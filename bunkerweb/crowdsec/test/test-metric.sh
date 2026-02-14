@@ -62,15 +62,23 @@ echo "$METRICS"
 echo
 
 # ---------- parse: Local API routes hits ----------
-hb_hits="$(echo "$METRICS" | awk '
-  $1=="/v1/heartbeat" && $2=="GET" {print $3}
-' | tail -n 1)"
-login_hits="$(echo "$METRICS" | awk '
-  $1=="/v1/watchers/login" && $2=="POST" {print $3}
-' | tail -n 1)"
-usage_hits="$(echo "$METRICS" | awk '
-  $1=="/v1/usage-metrics" && $2=="POST" {print $3}
-' | tail -n 1)"
+hb_hits="$(echo "$METRICS" | awk '/\/v1\/heartbeat/ {gsub(/[|]/, ""); print $NF}' | tail -n 1)"
+login_hits="$(echo "$METRICS" | awk '/\/v1\/watchers\/login/ {gsub(/[|]/, ""); print $NF}' | tail -n 1)"
+usage_hits="$(echo "$METRICS" | awk '/\/v1\/usage-metrics/ {gsub(/[|]/, ""); print $NF}' | tail -n 1)"
+decision_hits="$(echo "$METRICS" | awk '/\/v1\/decisions/ {gsub(/[|]/, ""); hits += $NF} END {print hits}')"
+hb_hits="${hb_hits:-0}"
+login_hits="${login_hits:-0}"
+usage_hits="${usage_hits:-0}"
+decision_hits="${decision_hits:-0}"
+# Clean up any leftover characters to ensure numeric comparison
+hb_hits="${hb_hits//[^0-9]/}"
+login_hits="${login_hits//[^0-9]/}"
+usage_hits="${usage_hits//[^0-9]/}"
+decision_hits="${decision_hits//[^0-9]/}"
+hb_hits="${hb_hits:-0}"
+login_hits="${login_hits:-0}"
+usage_hits="${usage_hits:-0}"
+decision_hits="${decision_hits:-0}"
 
 # Some tables can be missing => default 0
 hb_hits="${hb_hits:-0}"
@@ -81,19 +89,23 @@ echo "== Local API sanity =="
 echo "heartbeat hits : $hb_hits"
 echo "login hits     : $login_hits"
 echo "usage-metrics  : $usage_hits"
+echo "decision hits  : $decision_hits"
 echo
 
 # ---------- parse: Acquisition metrics totals ----------
 # Sum of "Lines read/parsed/unparsed" from acquisition table (best-effort)
 # We ignore header/separator lines; pick rows that start with something like docker:/...
 acq_totals="$(echo "$METRICS" | awk '
-  $1 ~ /^[a-z]+:\/\// {
+  /^[|] (docker|file|journal|syslog):/ {
+    # Remove pipes and count columns
+    gsub(/[|]/, " ")
     read += $2
-    parsed += ($3=="-"?0:$3)
+    p = ($3=="-"?0:$3)
+    parsed += p
     unparsed += ($4=="-"?0:$4)
   }
   END { printf("%d %d %d\n", read, parsed, unparsed) }
-')"
+' | sed 's/[^0-9 ]//g')"
 acq_read="$(echo "$acq_totals" | awk '{print $1}')"
 acq_parsed="$(echo "$acq_totals" | awk '{print $2}')"
 acq_unparsed="$(echo "$acq_totals" | awk '{print $3}')"
@@ -126,8 +138,8 @@ echo "== Parser focus (best-effort) =="
 echo
 
 # ---------- parse: Whitelist hits ----------
-wl_private="$(echo "$METRICS" | awk '$1=="crowdsecurity/whitelists"{print $3}' | tail -n 1)"
-wl_public_dns="$(echo "$METRICS" | awk '$1=="crowdsecurity/public-dns-allowlist"{print $3}' | tail -n 1)"
+wl_private="$(echo "$METRICS" | awk '/crowdsecurity\/whitelists/ {print $(NF-1)}' | tail -n 1)"
+wl_public_dns="$(echo "$METRICS" | awk '/crowdsecurity\/public-dns-allowlist/ {print $(NF-1)}' | tail -n 1)"
 wl_private="${wl_private:-0}"
 wl_public_dns="${wl_public_dns:-0}"
 
@@ -145,10 +157,10 @@ echo
 status=0
 
 echo "== Verdict =="
-if [[ "$hb_hits" -gt 0 ]]; then
-  ok "Local API alive (heartbeat hits > 0)"
+if [[ "$hb_hits" -gt 0 || "$decision_hits" -gt 0 ]]; then
+  ok "Local API alive (heartbeat/decision hits > 0)"
 else
-  err "Local API might be down (no /v1/heartbeat hits)"
+  err "Local API might be down (no /v1/heartbeat or /v1/decisions hits)"
   status=10
 fi
 
