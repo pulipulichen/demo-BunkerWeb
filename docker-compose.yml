@@ -49,10 +49,10 @@ services:
   nginx:
     image: nginx:1.20
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       - ./php:/var/www/html
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template
     env_file:
       - ./.env
     depends_on:
@@ -90,3 +90,7 @@ networks:
         - subnet: 10.20.30.0/24
   bw-services:
     name: bw-services
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.40.0/24

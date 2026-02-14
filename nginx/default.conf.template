@@ -1,0 +1,130 @@
+# ========================================================
+# [全域基礎限制
+# ========================================================
+limit_req_zone $binary_remote_addr zone=mw_general:10m rate=20r/s;
+limit_req_zone $binary_remote_addr zone=mw_api:10m rate=2r/s;
+limit_req_zone $binary_remote_addr zone=mw_load:10m rate=40r/s;
+limit_conn_zone $binary_remote_addr zone=mw_conn:10m;
+
+# ========================================================
+# 定義特定 IP 區段 (群組識別)
+# ========================================================
+geo $remote_addr $restricted_group_id {
+    default 0;
+    101.47.0.0/16    "group_101_47";
+    47.82.0.0/16     "group_47_82";
+    27.21.0.0/16     "group_27_21";
+    45.78.0.0/16     "group_45_78";
+    60.164.0.0/16     "group_60_164";
+    60.164.0.0/16     "group_60_164";
+    43.173.0.0/16    "group_43_173";
+    43.163.0.0/16    "group_43_163";
+    101.47.0.0/16    "group_101_47";
+    140.249.0.0/16   "group_140_249";
+    140.250.0.0/16   "group_140_250";
+    140.224.0.0/16   "group_140_224";
+    207.166.0.0/16   "group_207_166";
+    123.6.0.0/16   "group_123_6";
+    57.141.2.0/24    "group_57_141_2";
+}
+
+# ========================================================
+# 建立複合 Key (條件交叉判斷)
+# ========================================================
+
+# 只要命中區段，Key 就是群組 ID
+map $restricted_group_id $key_group_all {
+    "0" "";
+    default $restricted_group_id;
+}
+
+# ========================================================
+# 定義限流區塊 (Zones)
+# ========================================================
+
+# 整個區段每秒 1 次
+limit_req_zone $key_group_all zone=mw_punish:10m rate=6r/m;
+
+# ========================================================
+# 定義限流區塊 (Zones)
+# ========================================================
+
+map $http_user_agent $mw_block_bot {
+    default 0;
+    ~*SemrushBot  1;
+    ~*AhrefsBot   1;
+    ~*MJ12bot     1;
+    ~*DotBot      1;
+    ~*PetalBot    1;
+    ~*YisouSpider 1;
+    ~*Yisou       1;
+    ~*Sogou       1;
+    ~*Baiduspider 0;
+    ~*Bytespider  1;
+    ~*GPTBot      1;
+    ~*ClaudeBot   1;
+    ~*CCBot       1;
+    ~*Diffbot     1;
+    ~*FacebookBot 1;
+    ~*Go-http-client   1;
+    ~*Python-urllib    1;
+    ~*python-requests  1;
+    ~*Scrapy           1;
+    ~*Java/            1;
+    # ~*curl             1;
+    ~*wget             1;
+}
+
+# ========================================================
+# 伺服器設定
+# ========================================================
+
+server {
+    listen 80;
+
+    client_max_body_size 1G;
+    index index.php index.html;
+    root /var/www/html;
+
+    # 真實 IP 解析
+    set_real_ip_from 10.20.40.0/24;
+
+    real_ip_header X-Forwarded-For;
+    real_ip_recursive on;
+
+    # ========================================================
+
+    limit_req_status 429;
+
+    if ($mw_block_bot) { return 403; }
+    limit_conn mw_conn 30;
+
+    # ========================================================
+    # 套用限流規則 (順序很重要)
+    # ========================================================
+    
+    # 所有 PHP 請求點都會經過這裡
+    location / {
+        # 1. 檢查群組總量限制 (1r/s)
+        limit_req zone=mw_punish burst=1 nodelay;
+        # 2. 一般頁面限制
+        limit_req zone=mw_general burst=40 nodelay;
+
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+    location ~ \.php$ {
+        limit_req zone=mw_punish burst=1 nodelay;
+        limit_req zone=mw_general burst=40 nodelay;
+
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass php:9000;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_hide_header X-Powered-By;
+    }
+
+    # 其他安全規則
+    location ~ /\. { log_not_found off; deny all; }
+}
