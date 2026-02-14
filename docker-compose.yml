@@ -5,6 +5,7 @@ services:
       - "8080:8080/tcp"
     env_file:
       - bunkerweb/.env
+      - bunkerweb/.env.crowdsec
     # restart: "unless-stopped"
     networks:
       - bw-internal
