@@ -1,5 +1,5 @@
 services:
-  bunkerweb:
+  bunkerweb-instance:
     image: bunkerity/bunkerweb:1.6.8
     ports:
       - "8080:8080/tcp"
@@ -15,12 +15,10 @@ services:
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.8
     depends_on:
-      - bunkerweb
+      - bunkerweb-instance
     volumes:
       - bw-data:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # - ./bunkerweb/download-pro-plugins.py:/usr/share/bunkerweb/core/pro/jobs/download-pro-plugins.py:ro
-      # - ./bunkerweb/bunkernet.py:/usr/share/bunkerweb/core/bunkernet/jobs/bunkernet.py
     env_file:
       - bunkerweb/.env
       - bunkerweb/.env.crowdsec
@@ -44,7 +42,7 @@ services:
     image: crowdsecurity/crowdsec:v1.7.6
     # restart: unless-stopped
     depends_on:
-      - bunkerweb
+      - bunkerweb-instance
     networks:
       - bw-internal
     env_file:
