@@ -10,6 +10,7 @@ if [ ! -f .env.crowdsec ]; then
 fi
 
 # Find the crowdsec container name (it might have a prefix or suffix)
+sleep 5
 CROWDSEC_CONTAINER=$(sudo docker ps --format '{{.Names}}' | grep crowdsec | head -n 1)
 
 if [ -z "$CROWDSEC_CONTAINER" ]; then
@@ -68,6 +69,7 @@ echo "Restarting BunkerWeb containers to apply changes..."
 
 # Go back to the root directory to run docker compose
 cd ..
-sudo docker compose restart bunkerweb-instance bw-scheduler
+sudo docker compose down bunkerweb-instance bw-scheduler
+sudo docker compose up -d bunkerweb-instance bw-scheduler
 
 echo "Containers restarted successfully."
