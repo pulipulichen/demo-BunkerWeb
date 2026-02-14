@@ -19,6 +19,8 @@ services:
     volumes:
       - bw-storage:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      # - ./bunkerweb/download-pro-plugins.py:/usr/share/bunkerweb/core/pro/jobs/download-pro-plugins.py:ro
+      # - ./bunkerweb/bunkernet.py:/usr/share/bunkerweb/core/bunkernet/jobs/bunkernet.py
     env_file:
       - bunkerweb/.env
       - bunkerweb/.env.crowdsec
