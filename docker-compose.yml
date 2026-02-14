@@ -1,0 +1,92 @@
+services:
+  # bunkerweb:
+  #   image: bunkerity/bunkerweb:1.6.8
+  #   container_name: bunkerweb
+  #   ports:
+  #     - "80:8080/tcp"
+  #   env_file:
+  #     - bunkerweb/.env
+  #   environment:
+      
+  #   restart: "unless-stopped"
+  #   networks:
+  #     - bw-universe
+  #     - bw-services
+
+  # bw-scheduler:
+  #   image: bunkerity/bunkerweb-scheduler:1.6.8
+  #   depends_on:
+  #     - bunkerweb
+  #   volumes:
+  #     - bw-storage:/data
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   env_file:
+  #     - bunkerweb/.env
+  #     - bunkerweb/.env.crowdsec
+  #     - bunkerweb/.env.mediawiki
+  #   restart: "unless-stopped"
+  #   networks:
+  #     - bw-universe
+
+  # crowdsec:
+  #   image: crowdsecurity/crowdsec:v1.7.6
+  #   restart: unless-stopped
+  #   networks:
+  #     - bw-universe
+  #   environment:
+  #     # 基本上先裝 nginx + 常見 HTTP 情境偵測
+  #     - COLLECTIONS=crowdsecurity/nginx crowdsecurity/base-http-scenarios crowdsecurity/http-cve bunkerity/bunkerweb crowdsecurity/appsec-generic-rules 
+  #     - SCENARIOS=crowdsecurity/http-crawl-non_statics crowdsecurity/http-bad-user-agent crowdsecurity/http-probing
+  #   volumes:
+  #     - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
+  #     - ./crowdsec/blocklists.yaml:/etc/crowdsec/blocklists.yaml:ro
+  #     # CrowdSec 資料/設定持久化
+  #     - crowdsec-data:/var/lib/crowdsec/data
+  #     - crowdsec-config:/etc/crowdsec
+  #     # 讓 CrowdSec 直接讀 docker logs（最省事，不用額外掛 access.log）
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  nginx:
+    image: nginx:1.20
+    ports:
+      - "80:80"
+    volumes:
+      - ./php:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    env_file:
+      - ./.env
+    depends_on:
+      - php
+    networks:
+      - bw-services
+
+  php:
+    image: php:8.4.18-fpm-alpine3.22
+    deploy:
+      mode: replicated
+      replicas: 1 # 在這裡控制你要幾台，想改 5 台就改這裡
+      resources:
+        limits:
+          cpus: '1' # 限制單一容器最多使用 1.5 個 CPU 核心
+          memory: 256M # 如果需要限制記憶體也可以加在這裡
+    volumes:
+      - ./php:/var/www/html
+    env_file:
+      - ./.env
+    networks:
+      - bw-services
+
+volumes:
+  bw-storage:
+  crowdsec-data:
+  crowdsec-config:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24
+  bw-services:
+    name: bw-services
