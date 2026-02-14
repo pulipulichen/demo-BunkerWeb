@@ -2,8 +2,6 @@
 
 cd $(dirname $0)
 
-git pull
-
-docker compose down
-docker compose up --build -d
-docker compose logs -f
+sudo docker compose down
+sudo docker compose up --build -d
+sudo docker compose logs -f

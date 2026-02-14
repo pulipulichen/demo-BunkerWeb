@@ -1,55 +1,49 @@
 services:
-  # bunkerweb:
-  #   image: bunkerity/bunkerweb:1.6.8
-  #   container_name: bunkerweb
-  #   ports:
-  #     - "80:8080/tcp"
-  #   env_file:
-  #     - bunkerweb/.env
-  #   environment:
-      
-  #   restart: "unless-stopped"
-  #   networks:
-  #     - bw-universe
-  #     - bw-services
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.8
+    ports:
+      - "8080:8080/tcp"
+    env_file:
+      - bunkerweb/.env
+    # restart: "unless-stopped"
+    networks:
+      - bw-universe
+      - bw-services
 
-  # bw-scheduler:
-  #   image: bunkerity/bunkerweb-scheduler:1.6.8
-  #   depends_on:
-  #     - bunkerweb
-  #   volumes:
-  #     - bw-storage:/data
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #   env_file:
-  #     - bunkerweb/.env
-  #     - bunkerweb/.env.crowdsec
-  #     - bunkerweb/.env.mediawiki
-  #   restart: "unless-stopped"
-  #   networks:
-  #     - bw-universe
+  bw-scheduler:
+    image: bunkerity/bunkerweb-scheduler:1.6.8
+    depends_on:
+      - bunkerweb
+    volumes:
+      - bw-storage:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    env_file:
+      - bunkerweb/.env
+      - bunkerweb/.env.crowdsec
+      - bunkerweb/.env.mediawiki
+    # restart: "unless-stopped"
+    networks:
+      - bw-universe
 
-  # crowdsec:
-  #   image: crowdsecurity/crowdsec:v1.7.6
-  #   restart: unless-stopped
-  #   networks:
-  #     - bw-universe
-  #   environment:
-  #     # 基本上先裝 nginx + 常見 HTTP 情境偵測
-  #     - COLLECTIONS=crowdsecurity/nginx crowdsecurity/base-http-scenarios crowdsecurity/http-cve bunkerity/bunkerweb crowdsecurity/appsec-generic-rules 
-  #     - SCENARIOS=crowdsecurity/http-crawl-non_statics crowdsecurity/http-bad-user-agent crowdsecurity/http-probing
-  #   volumes:
-  #     - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
-  #     - ./crowdsec/blocklists.yaml:/etc/crowdsec/blocklists.yaml:ro
-  #     # CrowdSec 資料/設定持久化
-  #     - crowdsec-data:/var/lib/crowdsec/data
-  #     - crowdsec-config:/etc/crowdsec
-  #     # 讓 CrowdSec 直接讀 docker logs（最省事，不用額外掛 access.log）
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  crowdsec:
+    image: crowdsecurity/crowdsec:v1.7.6
+    # restart: unless-stopped
+    networks:
+      - bw-universe
+    env_file:
+      - ./crowdsec/.env
+    volumes:
+      - ./crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
+      # CrowdSec 資料/設定持久化
+      - crowdsec-data:/var/lib/crowdsec/data
+      - crowdsec-config:/etc/crowdsec
+      # 讓 CrowdSec 直接讀 docker logs（最省事，不用額外掛 access.log）
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
   nginx:
     image: nginx:1.20
     ports:
-      - "8080:80"
+      - "8081:80"
     volumes:
       - ./php:/var/www/html
       - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template
