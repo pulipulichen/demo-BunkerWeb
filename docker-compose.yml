@@ -17,7 +17,7 @@ services:
     depends_on:
       - bunkerweb
     volumes:
-      - bw-storage:/data
+      - bw-data:/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # - ./bunkerweb/download-pro-plugins.py:/usr/share/bunkerweb/core/pro/jobs/download-pro-plugins.py:ro
       # - ./bunkerweb/bunkernet.py:/usr/share/bunkerweb/core/bunkernet/jobs/bunkernet.py
@@ -25,6 +25,20 @@ services:
       - bunkerweb/.env
       - bunkerweb/.env.crowdsec
     # restart: "unless-stopped"
+    networks:
+      - bw-internal
+
+  bw-ui:
+    image: bunkerity/bunkerweb-ui:1.6.0-rc1
+    container_name: bw-ui
+    environment:
+      ADMIN_USERNAME: root
+      ADMIN_PASSWORD: "!QAZ2wsx"
+    # restart: "unless-stopped"
+    volumes:
+      - bw-data:/data
+    ports:
+      - 7000:7000
     networks:
       - bw-internal
 
@@ -76,7 +90,7 @@ services:
       - bw-services
 
 volumes:
-  bw-storage:
+  bw-data:
   crowdsec-data:
   crowdsec-config:
 
