@@ -80,13 +80,11 @@ volumes:
 
 networks:
   bw-internal:
-    name: bw-internal
     ipam:
       driver: default
       config:
         - subnet: 10.20.30.0/24
   bw-services:
-    name: bw-services
     ipam:
       driver: default
       config:
