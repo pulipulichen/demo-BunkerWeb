@@ -2,4 +2,4 @@ source: docker
 container_name_regexp:
   - ".*bunkerweb.*"
 labels:
-  type: nginx
+  type: bunkerweb
