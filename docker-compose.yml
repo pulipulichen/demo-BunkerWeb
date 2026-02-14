@@ -30,7 +30,6 @@ services:
 
   bw-ui:
     image: bunkerity/bunkerweb-ui:1.6.0-rc1
-    container_name: bw-ui
     environment:
       ADMIN_USERNAME: root
       ADMIN_PASSWORD: "!QAZ2wsx"
