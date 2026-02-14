@@ -29,10 +29,12 @@ services:
       - bw-internal
 
   bw-ui:
-    image: bunkerity/bunkerweb-ui:1.6.0-rc1
+    image: bunkerity/bunkerweb-ui:1.6.8
     environment:
-      ADMIN_USERNAME: root
+      ADMIN_USERNAME: admin
       ADMIN_PASSWORD: "!QAZ2wsx"
+      FLASK_SECRET: "changeme123456"
+      ABSOLUTE_URI: "http://localhost:7000"
     # restart: "unless-stopped"
     volumes:
       - bw-data:/data
