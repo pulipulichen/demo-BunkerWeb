@@ -7,8 +7,10 @@ services:
       - bunkerweb/.env
     # restart: "unless-stopped"
     networks:
-      - bw-universe
+      - bw-internal
       - bw-services
+    depends_on:
+      - nginx
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.8
@@ -20,16 +22,17 @@ services:
     env_file:
       - bunkerweb/.env
       - bunkerweb/.env.crowdsec
-      - bunkerweb/.env.mediawiki
     # restart: "unless-stopped"
     networks:
-      - bw-universe
+      - bw-internal
 
   crowdsec:
     image: crowdsecurity/crowdsec:v1.7.6
     # restart: unless-stopped
+    depends_on:
+      - bunkerweb
     networks:
-      - bw-universe
+      - bw-internal
     env_file:
       - ./crowdsec/.env
     volumes:
@@ -42,8 +45,8 @@ services:
 
   nginx:
     image: nginx:1.20
-    ports:
-      - "8081:80"
+    # ports:
+    #   - "8081:80"
     volumes:
       - ./php:/var/www/html
       - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template
@@ -76,8 +79,8 @@ volumes:
   crowdsec-config:
 
 networks:
-  bw-universe:
-    name: bw-universe
+  bw-internal:
+    name: bw-internal
     ipam:
       driver: default
       config:
