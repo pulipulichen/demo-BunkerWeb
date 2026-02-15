@@ -5,13 +5,14 @@ services:
       - "8080:8080/tcp"
     env_file:
       - bunkerweb/.env
+      - bunkerweb/.env.reverse_proxy
       - bunkerweb/.env.crowdsec
     # restart: "unless-stopped"
     networks:
       - bw-internal
       - bw-services
     depends_on:
-      - nginx
+      - app
 
   bw-scheduler:
     image: bunkerity/bunkerweb-scheduler:1.6.8
@@ -22,6 +23,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     env_file:
       - bunkerweb/.env
+      - bunkerweb/.env.reverse_proxy
       - bunkerweb/.env.crowdsec
     # restart: "unless-stopped"
     networks:
@@ -56,7 +58,7 @@ services:
       - ./bunkerweb/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-  nginx:
+  app:
     image: nginx:1.20
 
     # Open this port if testing is needed

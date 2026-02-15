@@ -10,10 +10,6 @@ The architecture takes Nginx base configurations and security policy parameters 
 
 By integrating **CrowdSec**, this setup gains community-powered threat intelligence, allowing it to proactively block known malicious IPs and share attack data with the CrowdSec network, significantly enhancing the overall security and stability of web services.
 
-## How to Integrate into Your Own Website
-
-Modify `docker-compose.yml` to update the `nginx` and `php` service configurations to match your specific application requirements.
-
 ## Getting Started
 
 ### Prerequisites
@@ -47,9 +43,12 @@ Wait until you see the message:
 
 1.  Open [http://localhost:8080](http://localhost:8080) in your browser.
 2.  **Note**: It takes approximately 30 seconds for BunkerWeb to complete its initialization. If you access it too early, you may see a loading page with a `GENERATING BUNKERWEB CONFIG...`  message.
-    ![Waiting for BunkerWeb](doc/waiting-bunkerweb.png)
+
+![Waiting for BunkerWeb](doc/waiting-bunkerweb.png)
+
 3.  Once ready, the website should be accessible.
-    ![Site Working](doc/site-working.png)
+
+![Site Working](doc/site-working.png)
 
 ## Verifying BunkerWeb and CrowdSec Integration is Working
 
@@ -119,22 +118,6 @@ The website should now be accessible again:
 
 ![Site Recovered](doc/site-recovered.png)
 
-## Customization
-
-### Changing the BunkerWeb Port
-
-By default, BunkerWeb listens on port `8080`. To change this, modify the `ports` section of the `bunkerweb-instance` service in `docker-compose.yml`:
-
-```yaml
-services:
-  bunkerweb-instance:
-    # ...
-    ports:
-      - "YOUR_PORT:8080/tcp" # Replace YOUR_PORT with your desired port (e.g., 80:8080)
-```
-
-After making changes, restart the environment using `./start.sh`.
-
 ## Monitoring with BunkerWeb UI
 
 Access the BunkerWeb UI at [http://localhost:7000](http://localhost:7000).
@@ -147,5 +130,32 @@ You can modify the admin credentials in `./bunkerweb/bw-ui/.env`. If this file d
 Once logged in, you can monitor blocked requests and security events:
 
 ![BunkerWeb UI Dashboard](doc/bunkerweb-ui-dashboard.png)
+
+After making changes, restart the environment using `./start.sh`.
+
+
+## Customization
+
+
+### How to Integrate into Your Own Website
+
+#TODO docker-compose.yml裡面需要修改的地方，幫我明確加上註解
+
+Modify `docker-compose.yml` to update the `nginx` and `php` service configurations to match your specific application requirements.
+
+#TODO 幫我舉一個變成firebrowser的例子，剛好port也是80
+
+
+### Changing the BunkerWeb Port
+
+By default, BunkerWeb listens on port `8080`. To change this, modify the `ports` section of the `bunkerweb-instance` service in `docker-compose.yml`:
+
+```yaml
+services:
+  bunkerweb-instance:
+    # ...
+    ports:
+      - "YOUR_PORT:8080/tcp" # Replace YOUR_PORT with your desired port (e.g., 80:8080)
+```
 
 After making changes, restart the environment using `./start.sh`.
