@@ -18,6 +18,8 @@ Modify `docker-compose.yml` to update the `nginx` and `php` service configuratio
 
 ### Prerequisites
 
+The project has been tested and confirmed to work in the following environment:
+
 - **OS**: Ubuntu 24.04 (recommended)
 - **Docker**: Version 28.3.3, build 980b856 or later
 
@@ -61,7 +63,12 @@ Run the attack simulation script:
 npm run test
 ```
 
-#TODO 請描述 ban-bot-attach.sh腳本在做什麼
+The `ban-bot-attack.sh` script automates the attack simulation by:
+1. Detecting the BunkerWeb port and container IDs.
+2. Sending a normal request to confirm the site is up.
+3. Triggering a "Bad User-Agent" rule (using `sqlmap` UA).
+4. Performing an aggressive crawl on non-existent paths to trigger bot detection.
+5. Verifying that CrowdSec has added a ban decision and that BunkerWeb returns a 403 Forbidden status.
 
 ![Test Attack Command](doc/test-attack-command.png)
 
@@ -97,7 +104,10 @@ To restore access, run the unban script:
 npm run unban
 ```
 
-#TODO 請描述 unban腳本在做什麼
+The `unban.sh` script restores access by:
+1. Restoring the CrowdSec whitelist if it was disabled during the test.
+2. Deleting the ban decision for the attacker's IP from CrowdSec using `cscli`.
+3. Manually unbanning the IP from BunkerWeb using `bwcli`.
 
 ![Unban Command](doc/unban-command.png)
 
@@ -125,17 +135,17 @@ services:
 
 After making changes, restart the environment using `./start.sh`.
 
-# 用BunkerWeb UI來監控
+## Monitoring with BunkerWeb UI
 
-開啟 `http://localhost:7000` 可以使用BunkerWeb UI
+Access the BunkerWeb UI at [http://localhost:7000](http://localhost:7000).
 
-修改帳號密碼，位置在 `./bunkerweb/bw-ui/.env`
+You can modify the admin credentials in `./bunkerweb/bw-ui/.env`. If this file does not exist, it will use the default values from `./bunkerweb/bw-ui/.env.example`:
 
-如果沒有，則會用預設值 `./bunkerweb/bw-ui/.env.example`
+- **Username**: `admin`
+- **Password**: `!j42U/!j42U/t!j42U!j42U`
 
-- Username: `admin`
-- Password: `!j42U/!j42U/t!j42U!j42U`
+Once logged in, you can monitor blocked requests and security events:
 
-登入後可以看到封鎖的請求跟訊息：
+![BunkerWeb UI Dashboard](doc/bunkerweb-ui-dashboard.png)
 
-![[Pasted image 20260215152448.png]]
+After making changes, restart the environment using `./start.sh`.
