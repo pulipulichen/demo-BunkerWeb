@@ -2,7 +2,7 @@
 
 A project demonstrating how to use BunkerWeb as a firewall for Nginx servers.
 
-## What is it?
+## Project Description
 
 This project demonstrates the integration of **BunkerWeb** and **CrowdSec** with **Nginx** to build a robust Web Application Firewall (WAF) environment.
 
