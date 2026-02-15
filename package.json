@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "sudo docker compose down; sudo docker compose up --build",
+    "start": "./start.sh",
     "test": "./test/bunkerweb/ban-bot-attack.sh",
     "unban": "./test/bunkerweb/unban.sh"
   }

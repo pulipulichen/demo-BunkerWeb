@@ -1,75 +1,126 @@
 # demo-BunkerWeb
+
 A project demonstrating how to use BunkerWeb as a firewall for Nginx servers.
 
-# What is it?
+## What is it?
 
-This project demonstrates the integration of BunkerWeb with Nginx to build a robust Web Application Firewall (WAF). The input data consists of Nginx base configurations, security policy parameters, and real-time network traffic requests; through BunkerWeb's security processing and filtering, the output is a hardened web server environment capable of automatically identifying and blocking malicious attacks such as SQL injection and Cross-Site Scripting (XSS), ensuring the overall security and stability of web services.
+This project demonstrates the integration of **BunkerWeb** and **CrowdSec** with **Nginx** to build a robust Web Application Firewall (WAF) environment.
 
-#TODO 敘述的地方還要加上 Crowdsec
+The architecture takes Nginx base configurations and security policy parameters as input. Through BunkerWeb's security processing, it creates a hardened web server capable of automatically identifying and blocking malicious attacks such as SQL injection, Cross-Site Scripting (XSS), and bot attacks.
 
-# 如何整合到自己的網站
+By integrating **CrowdSec**, this setup gains community-powered threat intelligence, allowing it to proactively block known malicious IPs and share attack data with the CrowdSec network, significantly enhancing the overall security and stability of web services.
 
-修改 docker-compose.yml ，修改裡面 nginx 跟 php 的資料
+## How to Integrate into Your Own Website
 
-# 如何啟動
+Modify `docker-compose.yml` to update the `nginx` and `php` service configurations to match your specific application requirements.
 
-環境 Ubuntu 24.04，Docker version 28.3.3, build 980b856
+## Getting Started
 
-執行 startup.sh
+### Prerequisites
 
-裡面會執行的內容
+- **OS**: Ubuntu 24.04 (recommended)
+- **Docker**: Version 28.3.3, build 980b856 or later
 
-1. 關閉之前執行的容器
-2. 啟動並進行編譯
-3. 觀察 logs
-4. 看到  `[INIT-WORKER] BunkerWeb is ready to fool hackers ! 🚀, context: ngx.timer` 就表示啟動完成。
-![[Pasted image 20260215144257.png]]
+### Launching the Environment
 
-使用者的操作：
-1. 開啟 http://localhost:8080
-2. 在   `[INIT-WORKER] BunkerWeb is ready to fool hackers ! 🚀, context: ngx.timer`  出現之前，需要等待 BunkerWeb準備完成，大概30秒
-![[Pasted image 20260215144242.png]]
-3. 可以正常連線
-![[Pasted image 20260215144414.png]]
+Run the startup script:
 
-# 如何驗證 BunkerWeb 跟 Crowdsec能夠正常連線
-
-執行 `./test/bunkerweb/ban-bot-attack.sh` ，也可以用 npm 指令執行 `npm run test` 。
-
-![[Pasted image 20260215150711.png]]
-
-執行中的樣子
-
-![[Peek 2026-02-15 15-04.gif]]
-
-此時 Log 的狀態是：
-
-![[Peek 2026-02-15 15-10.gif]]
-
-
-完成封鎖之後打開網頁 `http://localhost:8080` ，會出現403已經被封鎖的狀態。
-
-![[Pasted image 20260215150527.png]]
-
-BunkerWeb的log:
-
+```bash
+./start.sh
+# OR using npm
+npm run start
 ```
+
+The script performs the following actions:
+1. Stops and removes any existing containers.
+2. Builds and starts the containers in the background.
+3. Follows the logs to monitor the initialization process.
+
+Wait until you see the message:
+`[INIT-WORKER] BunkerWeb is ready to fool hackers ! 🚀, context: ngx.timer`
+
+![BunkerWeb Ready](doc/bunkerweb-ready.png)
+
+### User Instructions
+
+1.  Open [http://localhost:8080](http://localhost:8080) in your browser.
+2.  **Note**: It takes approximately 30 seconds for BunkerWeb to complete its initialization. If you access it too early, you may see a loading page with a `GENERATING BUNKERWEB CONFIG...`  message.
+    ![Waiting for BunkerWeb](doc/waiting-bunkerweb.png)
+3.  Once ready, the website should be accessible.
+    ![Site Working](doc/site-working.png)
+
+## Verifying BunkerWeb and CrowdSec Integration is Working
+
+To test if the firewall is correctly blocking malicious traffic, you can simulate a bot attack.
+
+Run the attack simulation script:
+
+```bash
+./test/bunkerweb/ban-bot-attack.sh
+# OR using npm
+npm run test
+```
+
+#TODO 請描述 ban-bot-attach.sh腳本在做什麼
+
+![Test Attack Command](doc/test-attack-command.png)
+
+### Simulation in Progress
+
+The script will simulate multiple malicious requests:
+
+![Attack Animation](doc/attack-animation.gif)
+
+You can monitor the real-time logs to see BunkerWeb and CrowdSec reacting:
+
+![Log Animation](doc/log-animation.gif)
+
+### After the Attack
+
+Once the IP is blocked, attempting to access [http://localhost:8080](http://localhost:8080) will result in a **403 Forbidden** error.
+
+![Access Denied](doc/access-denied.png)
+
+You will see similar entries in the BunkerWeb logs:
+
+```text
 bunkerweb-instance-1  | 2026/02/15 15:05:16 [notice] 139#139: *3876 [BADBEHAVIOR] decreased counter for IP 10.20.30.1 (0/10) on server localhost (status 403, scope service), context: ngx.timer
 ```
 
-## 解除封鎖
+## Unbanning an IP
 
-執行 `./test/bunkerweb/unban.sh` ，也可以用 npm 指令執行 `npm run unban` 。
+To restore access, run the unban script:
 
-![[Pasted image 20260215151120.png]]
+```bash
+./test/bunkerweb/unban.sh
+# OR using npm
+npm run unban
+```
 
-執行完成的畫面
-![[Pasted image 20260215151157.png]]
+#TODO 請描述 unban腳本在做什麼
 
-網頁可以再次讀取
+![Unban Command](doc/unban-command.png)
 
-![[Pasted image 20260215151210.png]]
+Execution results:
 
-# 如何修改 BunkerWeb Port 8080
+![Unban Success](doc/unban-success.png)
 
-#TODO 看Docker Compose，直接幫我寫完
+The website should now be accessible again:
+
+![Site Recovered](doc/site-recovered.png)
+
+## Customization
+
+### Changing the BunkerWeb Port
+
+By default, BunkerWeb listens on port `8080`. To change this, modify the `ports` section of the `bunkerweb-instance` service in `docker-compose.yml`:
+
+```yaml
+services:
+  bunkerweb-instance:
+    # ...
+    ports:
+      - "YOUR_PORT:8080/tcp" # Replace YOUR_PORT with your desired port (e.g., 80:8080)
+```
+
+After making changes, restart the environment using `./start.sh`.
