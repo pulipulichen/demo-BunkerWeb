@@ -16,6 +16,7 @@ By integrating **CrowdSec**, this setup gains community-powered threat intellige
 graph TD
     subgraph External
         User((User/Attacker))
+        Admin((Administrator))
     end
 
     subgraph "BunkerWeb Infrastructure (bw-internal)"
@@ -38,7 +39,7 @@ graph TD
     end
 
     User -- "Port 8080" --> BW
-    User -- "Port 7000" --> BWUI
+    Admin -- "Port 7000" --> BWUI
     
     %% Volumes
     BW-DATA[(bw-data)]
