@@ -7,4 +7,4 @@ sudo docker compose down -v > /dev/null 2>&1
 
 cp -f bunkerweb/.env.crowdsec.example bunkerweb/.env.crowdsec
 
-./startup.sh
+./start.sh

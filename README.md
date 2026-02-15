@@ -124,3 +124,18 @@ services:
 ```
 
 After making changes, restart the environment using `./start.sh`.
+
+# 用BunkerWeb UI來監控
+
+開啟 `http://localhost:7000` 可以使用BunkerWeb UI
+
+修改帳號密碼，位置在 `./bunkerweb/bw-ui/.env`
+
+如果沒有，則會用預設值 `./bunkerweb/bw-ui/.env.example`
+
+- Username: `admin`
+- Password: `!j42U/!j42U/t!j42U!j42U`
+
+登入後可以看到封鎖的請求跟訊息：
+
+![[Pasted image 20260215152448.png]]

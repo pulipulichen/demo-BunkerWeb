@@ -2,6 +2,7 @@
   "scripts": {
     "start": "./start.sh",
     "test": "./test/bunkerweb/ban-bot-attack.sh",
-    "unban": "./test/bunkerweb/unban.sh"
+    "unban": "./test/bunkerweb/unban.sh",
+    "reset": "./reset.sh"
   }
 }
