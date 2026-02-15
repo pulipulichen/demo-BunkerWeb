@@ -49,15 +49,17 @@ services:
     env_file:
       - ./bunkerweb/crowdsec/.env
     volumes:
-      - ./bunkerweb/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
-      # CrowdSec 資料/設定持久化
       - crowdsec-data:/var/lib/crowdsec/data
       - crowdsec-config:/etc/crowdsec
-      # 讓 CrowdSec 直接讀 docker logs（最省事，不用額外掛 access.log）
+
+       # To allow Crowdsec to read Docker messages for log analysis
+      - ./bunkerweb/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   nginx:
     image: nginx:1.20
+
+    # Open this port if testing is needed
     # ports:
     #   - "8081:80"
     volumes:
@@ -74,11 +76,11 @@ services:
     image: php:8.4.18-fpm-alpine3.22
     deploy:
       mode: replicated
-      replicas: 1 # 在這裡控制你要幾台，想改 5 台就改這裡
+      replicas: 1 # Replicas count
       resources:
         limits:
-          cpus: '1' # 限制單一容器最多使用 1.5 個 CPU 核心
-          memory: 256M # 如果需要限制記憶體也可以加在這裡
+          cpus: '1' # Limit the maximum number of CPU cores used by a single container
+          memory: 256M # Limit the maximum amount of memory used by a single container
     volumes:
       - ./php:/var/www/html
     env_file:

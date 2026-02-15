@@ -1,8 +1,2 @@
 **/[[]trash
-db_data
-src/images_old
-src/images/*
-!src/images/.htaccess
-!src/images/README
-src/**/.git/
-src/tamsuidbbackup.sql
+**/.obsidian
