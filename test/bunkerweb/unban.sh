@@ -16,8 +16,8 @@ NC='\033[0m'
 echo -e "${BLUE}=== Complex Bot Attack Simulation ===${NC}"
 
 # Dynamic detection
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+SCRIPT_DIR="$(pwd)"
+PROJECT_ROOT="$(cd "./../.." && pwd)"
 
 # Detect port from docker-compose.yml
 BUNKERWEB_PORT=$(grep -A 10 "bunkerweb-instance:" "${PROJECT_ROOT}/docker-compose.yml" | grep "ports:" -A 1 | grep -oP '"\K[0-9]+(?=:8080)')

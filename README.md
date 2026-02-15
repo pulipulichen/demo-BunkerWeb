@@ -36,8 +36,39 @@ This project demonstrates the integration of BunkerWeb with Nginx to build a rob
 
 執行 `./test/bunkerweb/ban-bot-attack.sh` ，也可以用 npm 指令執行 `npm run test` 。
 
-![[Pasted image 20260215145154.png]]
+![[Pasted image 20260215150711.png]]
 
+執行中的樣子
+
+![[Peek 2026-02-15 15-04.gif]]
+
+此時 Log 的狀態是：
+
+![[Peek 2026-02-15 15-10.gif]]
+
+
+完成封鎖之後打開網頁 `http://localhost:8080` ，會出現403已經被封鎖的狀態。
+
+![[Pasted image 20260215150527.png]]
+
+BunkerWeb的log:
+
+```
+bunkerweb-instance-1  | 2026/02/15 15:05:16 [notice] 139#139: *3876 [BADBEHAVIOR] decreased counter for IP 10.20.30.1 (0/10) on server localhost (status 403, scope service), context: ngx.timer
+```
+
+## 解除封鎖
+
+執行 `./test/bunkerweb/unban.sh` ，也可以用 npm 指令執行 `npm run unban` 。
+
+![[Pasted image 20260215151120.png]]
+
+執行完成的畫面
+![[Pasted image 20260215151157.png]]
+
+網頁可以再次讀取
+
+![[Pasted image 20260215151210.png]]
 
 # 如何修改 BunkerWeb Port 8080
 
