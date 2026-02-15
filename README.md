@@ -10,6 +10,47 @@ The architecture takes Nginx base configurations and security policy parameters 
 
 By integrating **CrowdSec**, this setup gains community-powered threat intelligence, allowing it to proactively block known malicious IPs and share attack data with the CrowdSec network, significantly enhancing the overall security and stability of web services.
 
+## System Architecture
+
+```mermaid
+graph TD
+    subgraph External
+        User((User/Attacker))
+    end
+
+    subgraph "BunkerWeb Infrastructure (bw-internal)"
+        BW[BunkerWeb Instance]
+        BWS[BunkerWeb Scheduler]
+        BWUI[BunkerWeb UI]
+        CS[CrowdSec]
+        
+        BWS <--> BW
+        BWUI <--> BWS
+        BW <--> CS
+    end
+
+    subgraph "Application Layer (bw-services)"
+        APP[Nginx App]
+        PHP[PHP-FPM]
+        
+        BW --> APP
+        APP <--> PHP
+    end
+
+    User -- "Port 8080" --> BW
+    User -- "Port 7000" --> BWUI
+    
+    %% Volumes
+    BW-DATA[(bw-data)]
+    CS-DATA[(crowdsec-data)]
+    
+    BWS -.-> BW-DATA
+    BWUI -.-> BW-DATA
+    CS -.-> CS-DATA
+```
+
+The architecture consists of a **BunkerWeb** instance acting as a secure reverse proxy that filters incoming traffic before it reaches the **Nginx** application server. A dedicated **CrowdSec** container provides community-driven threat intelligence and intrusion prevention, while the **BunkerWeb Scheduler** and **UI** handle configuration management and monitoring, all interconnected through isolated Docker networks to ensure robust security and separation of concerns.
+
 ## Getting Started
 
 ### Prerequisites
