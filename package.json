@@ -3,6 +3,7 @@
     "start": "./start.sh",
     "test": "./test/bunkerweb/ban-bot-attack.sh",
     "unban": "./test/bunkerweb/unban.sh",
+    "stop": "./stop.sh",
     "reset": "./reset.sh"
   }
 }
