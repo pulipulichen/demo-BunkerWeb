@@ -58,15 +58,17 @@ services:
       - ./bunkerweb/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
+  # This service is your application's web server (e.g., Nginx)
+  # You can modify the image or mount your own configuration files as needed
   app:
     image: nginx:1.20
 
-    # Open this port if testing is needed
+    # Open this port if direct testing of this service is needed (bypassing BunkerWeb)
     # ports:
     #   - "8081:80"
     volumes:
-      - ./php:/var/www/html
-      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template
+      - ./php:/var/www/html # Mount the source code directory
+      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template # Mount the Nginx configuration template
     env_file:
       - ./.env
     depends_on:
@@ -74,6 +76,7 @@ services:
     networks:
       - bw-services
 
+  # This service provides the PHP runtime environment. If your app is not PHP-based, you can remove or replace it.
   php:
     image: php:8.4.18-fpm-alpine3.22
     deploy:
@@ -84,7 +87,7 @@ services:
           cpus: '1' # Limit the maximum number of CPU cores used by a single container
           memory: 256M # Limit the maximum amount of memory used by a single container
     volumes:
-      - ./php:/var/www/html
+      - ./php:/var/www/html # Sync the source code with the app service
     env_file:
       - ./.env
     networks:

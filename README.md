@@ -139,14 +139,29 @@ After making changes, restart the environment using `./start.sh`.
 
 ### How to Integrate into Your Own Website
 
-#TODO docker-compose.yml裡面需要修改的地方，幫我明確加上註解
+To integrate your own website, you need to modify the `app` and `php` service configurations in `docker-compose.yml` according to your application requirements. We have added comments in `docker-compose.yml` to guide you through these modifications.
 
-Modify `docker-compose.yml` to update the `nginx` and `php` service configurations to match your specific application requirements.
+#### Example: Replacing the Service with `firebrowser` and Using Port 80
 
-#TODO 幫我舉一個變成firebrowser的例子，剛好port也是80
+If you want to replace the existing service with another web service (e.g., `firebrowser`) and want to access it via Port 80, you can remove the `php` service and update the **image** of the `app` service.
+
+1. **Update the `app` service in `docker-compose.yml`**:
+
+```yaml
+services:
+  app:
+    image: firebrowser/firebrowser:latest # Replace with the firebrowser image
+    networks:
+      - bw-services
+```
+
+2.  **Remove Unnecessary Services**:
+    If your application doesn't require a PHP environment, remember to delete the entire `php` service block from `docker-compose.yml`.
 
 
-### Changing the BunkerWeb Port
+### Changing the BunkerWeb and UI Ports
+
+#### Changing the BunkerWeb Port
 
 By default, BunkerWeb listens on port `8080`. To change this, modify the `ports` section of the `bunkerweb-instance` service in `docker-compose.yml`:
 
@@ -156,6 +171,30 @@ services:
     # ...
     ports:
       - "YOUR_PORT:8080/tcp" # Replace YOUR_PORT with your desired port (e.g., 80:8080)
+```
+
+#### Changing or Disabling the BunkerWeb UI Port
+
+By default, the BunkerWeb UI is accessible on port `7000`.
+
+- **To change the port**, modify the `ports` section of the `bw-ui` service:
+
+```yaml
+services:
+  bw-ui:
+    # ...
+    ports:
+      - "YOUR_UI_PORT:7000" # Replace YOUR_UI_PORT with your desired port (e.g., 9000:7000)
+```
+
+- **To disable public access to the UI**, simply comment out or remove the `ports` section from the `bw-ui` service:
+
+```yaml
+services:
+  bw-ui:
+    # ...
+    # ports:
+    #   - 7000:7000
 ```
 
 After making changes, restart the environment using `./start.sh`.
